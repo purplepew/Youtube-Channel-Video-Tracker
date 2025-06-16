@@ -54,6 +54,7 @@ int main() {
             case 0: cout << "Goodbye!\n"; break;
             default: cout << "Invalid choice.\n";
         }
+          getch();
     } while (choice != 0);
 
     return 0;
@@ -76,6 +77,7 @@ void addChannel() {
     getline(cin, ch.ownerName);
     channels.push_back(ch);
     cout << "Channel added successfully!\n";
+    getch();
 }
 
 int findChannelIndexById(int id) {
@@ -115,6 +117,7 @@ void addVideoToChannel() {
 
     channels[index].videos.push_back(v);
     cout << "Video added to channel successfully!\n";
+ 
 }
 
 void displayAll() {
@@ -154,7 +157,7 @@ void displayAll() {
                  << setw(10) << v.comments << endl;
         }
     }
-    getch();
+  
 }
 
 void addPredefinedChannels() {
