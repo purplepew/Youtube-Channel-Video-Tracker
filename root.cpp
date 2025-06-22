@@ -19,19 +19,22 @@ struct ChannelNode {
     int channelId;
     string channelName;
     string ownerName;
-    vector<VideoNode> videos; // This is an array of videos.
+    vector<VideoNode> videos; // This is an array with VideoNode type.
 }; // Represents a YouTube channel and its associated videos
 
 vector<ChannelNode> channels; // Holds all channel entries in memory.
-int CHANNEL_ID = 100; // starting value of the ids
-int VIDEO_ID = 100; // I will increment them every channel or video created.
+int CHANNEL_ID = 500; // starting value of the ids. I will increment them every channel or video created.
+int VIDEO_ID = 500;
 
 void flushInput(); // Clears input buffer
-void addChannel(); // Adds a new channel to the list
-int findChannelIndexById(int id); // Finds index of a channel by ID
-void addVideoToChannel(); // Adds a video to a specific channel
-void displayAll(); // Displays all channel and video info
-void addPredefinedChannels(); // Adds some preset data
+
+void addChannel(); 
+void addVideoToChannel(); 
+void addPredefinedChannels(); 
+void displayAll(); 
+int findChannelIndexById(int id); 
+
+// ADD MORE CRUD OPERATIONS TOMORROW. GOODNIGHT.
 
 int main() {
 	addPredefinedChannels(); // Load initial channels and videos
@@ -65,9 +68,11 @@ int main() {
     return 0;
 }
 
+                // FUNCTIONSSSSSS
+
 void flushInput() {
-    cin.clear();
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    cin.clear(); // useful when cin fails ( when users enter letter when a number is expected).
+    cin.ignore(numeric_limits<streamsize>::max(), '\n'); // This prevents leftover input such as newline. Basta just use this after using cin>>
 }
 
 void addChannel() {
@@ -94,6 +99,22 @@ int findChannelIndexById(int id) {
 }
 
 void addVideoToChannel() {
+	
+	if (channels.empty()) {
+       cout<<"No channels available! Please add a channel first."<<endl;
+        return;
+    }
+    
+    // Display available channels
+    cout << "Available Channels:\n";
+    cout << string(50, '-') << "\n";
+    for (size_t i = 0; i < channels.size(); ++i) {
+        cout << "ID: " << channels[i].channelId 
+             << " | Name: " << channels[i].channelName 
+             << " | Owner: " << channels[i].ownerName << "\n";
+    }
+    cout << string(50, '-') << "\n";
+	
     int chId;
     cout << "Enter Channel ID to add video to: ";
     cin >> chId;
@@ -111,13 +132,13 @@ void addVideoToChannel() {
   
     cout << "Enter Title: ";
     getline(cin, v.title);
-    cout << "Enter Upload Date: ";
+    cout << "Enter Upload Date 'yyyy-mm-dd': ";
     getline(cin, v.uploadDate);
     cout << "Enter Views: ";
     cin >> v.views;
     cout << "Enter Likes: ";
     cin >> v.likes;
-    cout << "Enter Comments: ";
+    cout << "Enter Number of Comments: ";
     cin >> v.comments;
     flushInput();
 
@@ -129,7 +150,7 @@ void addVideoToChannel() {
 void displayAll() {
     for (size_t i = 0; i < channels.size(); ++i) {
         const ChannelNode &ch = channels[i];  
-        cout << "\n=================================================================================\n";
+        cout <<"\n" <<string(71, '=') << "\n";
         cout << "Channel ID   : " << ch.channelId << endl;
         cout << "Channel Name : \033[31m" << ch.channelName <<"\033[0m"<< endl;  // "\033[31m" color text to red. "\033[0m" reset the color
         cout << "Owner Name   : " << ch.ownerName << endl;
@@ -143,7 +164,7 @@ void displayAll() {
 		 // row header
         cout << "\nVideos:\n";
         cout << left       // align the string to the left
-        	 << setw(2) << "-"     // setw(num character wide column) 
+        	 << setw(2) << "-"     // setw(num characters wide column) 
              << setw(8)  << "ID"
              << setw(25) << "Title"
              << setw(12) << "Upload Date"
@@ -166,6 +187,7 @@ void displayAll() {
                  << setw(10) << v.comments << endl;
         }
     }
+    cout <<"\n" <<string(71, '=') << "\n";
 }
 
 void addPredefinedChannels() {
