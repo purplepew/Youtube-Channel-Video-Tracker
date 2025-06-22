@@ -13,27 +13,28 @@ struct VideoNode {
     int views;
     int likes;
     int comments;
-};
+}; // Represents a video with its properties.
 
 struct ChannelNode {
     int channelId;
     string channelName;
     string ownerName;
-    vector<VideoNode> videos;
-};
+    vector<VideoNode> videos; // This is an array of videos.
+}; // Represents a YouTube channel and its associated videos
 
-vector<ChannelNode> channels;
+vector<ChannelNode> channels; // Holds all channel entries in memory.
+int CHANNEL_ID = 100; // starting value of the ids
+int VIDEO_ID = 100; // I will increment them every channel or video created.
 
-void flushInput();
-void addChannel();
-int findChannelIndexById(int id);
-void addVideoToChannel();
-void displayAll();
-void addPredefinedChannels();
-
+void flushInput(); // Clears input buffer
+void addChannel(); // Adds a new channel to the list
+int findChannelIndexById(int id); // Finds index of a channel by ID
+void addVideoToChannel(); // Adds a video to a specific channel
+void displayAll(); // Displays all channel and video info
+void addPredefinedChannels(); // Adds some preset data
 
 int main() {
-	addPredefinedChannels();
+	addPredefinedChannels(); // Load initial channels and videos
 	
     int choice;
     do {
@@ -54,7 +55,11 @@ int main() {
             case 0: cout << "Goodbye!\n"; break;
             default: cout << "Invalid choice.\n";
         }
-          getch();
+        
+      
+        cout << "--> Press any key to continue. ";
+    	getch();
+        
     } while (choice != 0);
 
     return 0;
@@ -68,21 +73,22 @@ void flushInput() {
 void addChannel() {
 	
     ChannelNode ch;
-    cout << "Enter Channel ID: ";
-    cin >> ch.channelId;
-    flushInput();
+    
+    ch.channelId = CHANNEL_ID++;
+    
     cout << "Enter Channel Name: ";
     getline(cin, ch.channelName);
     cout << "Enter Owner Name: ";
     getline(cin, ch.ownerName);
+    
     channels.push_back(ch);
     cout << "Channel added successfully!\n";
-    getch();
+    
 }
 
 int findChannelIndexById(int id) {
     for (size_t i = 0; i < channels.size(); ++i) {
-        if (channels[i].channelId == id) return static_cast<int>(i);
+        if (channels[i].channelId == id) return static_cast<int>(i); // convert i with a data type of size_t to int
     }
     return -1;
 }
@@ -100,9 +106,9 @@ void addVideoToChannel() {
     }
 
     VideoNode v;
-    cout << "Enter Video ID: ";
-    cin >> v.videoId;
-    flushInput();
+    
+    v.videoId = VIDEO_ID++;
+  
     cout << "Enter Title: ";
     getline(cin, v.title);
     cout << "Enter Upload Date: ";
@@ -122,10 +128,10 @@ void addVideoToChannel() {
 
 void displayAll() {
     for (size_t i = 0; i < channels.size(); ++i) {
-        const ChannelNode &ch = channels[i];
+        const ChannelNode &ch = channels[i];  
         cout << "\n=================================================================================\n";
         cout << "Channel ID   : " << ch.channelId << endl;
-        cout << "Channel Name : \033[31m" << ch.channelName <<"\033[0m"<< endl;
+        cout << "Channel Name : \033[31m" << ch.channelName <<"\033[0m"<< endl;  // "\033[31m" color text to red. "\033[0m" reset the color
         cout << "Owner Name   : " << ch.ownerName << endl;
 
         if (ch.videos.empty()) {
@@ -133,9 +139,11 @@ void displayAll() {
             continue;
         }
 
+		 // Display videos
+		 // row header
         cout << "\nVideos:\n";
-        cout << left
-        	 << setw(2) << "-"
+        cout << left       // align the string to the left
+        	 << setw(2) << "-"     // setw(num character wide column) 
              << setw(8)  << "ID"
              << setw(25) << "Title"
              << setw(12) << "Upload Date"
@@ -144,7 +152,8 @@ void displayAll() {
              << setw(10) << "Comments" << endl;
 
         cout << string(71, '-') << endl;
-
+        
+		// row values
         for (size_t j = 0; j < ch.videos.size(); ++j) {
             const VideoNode &v = ch.videos[j];
             cout << left
@@ -157,7 +166,6 @@ void displayAll() {
                  << setw(10) << v.comments << endl;
         }
     }
-  
 }
 
 void addPredefinedChannels() {
