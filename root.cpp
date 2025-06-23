@@ -34,22 +34,31 @@ bool ascending = true; //global flag. Will be used when user is prompted Descend
 
 void flushInput(); // Clears input buffer
 
+
 void addChannel(); 
 void addVideoToChannel(); 
-void addVideosHelper(ChannelNode& c, VideoNode v);
 void addPredefinedChannels();
+ 
+// display datas in table
+void displayAll(); 
+void displaySortedByUploadDate();
+void displaySortedByViews();
+void displaySortedByLikes();
 
+// menus
 void displayMenu();
 void displaySortOptionMenu();
 void displaySortMenu();
 
-void displayAll(); 
-void displaySortUploadDate();
-void displayRowHeader();
-void displayRowValues(const VideoNode &v);
-
+// search
 int findChannelIndexById(int id); 
 
+// helper functions
+void displayRowHeader();
+void displayRowValues(const VideoNode &v);
+void addVideosHelper(ChannelNode& c, VideoNode v);
+
+// sort
 bool sortByUploadDate(const VideoNode &a, const VideoNode &b);
 
 // MAIN
@@ -88,6 +97,14 @@ int main() {
 // FUNCTIONSSSSSS
 bool sortByUploadDate(const VideoNode &a, const VideoNode &b) {
 	   return ascending ? (a.uploadDate < b.uploadDate) : (a.uploadDate > b.uploadDate);
+} 
+
+bool sortByViews(const VideoNode &a, const VideoNode &b) {
+	   return ascending ? (a.views < b.views) : (a.views > b.views);
+} 
+
+bool sortByLikes(const VideoNode &a, const VideoNode &b) {
+	   return ascending ? (a.likes < b.likes) : (a.likes > b.likes);
 } 
 
 void flushInput() {
@@ -173,7 +190,7 @@ void displayMenu() {
     do {
         cout << "\tDisplay: \n";
         cout << "\t1. Display All\n";
-        cout << "\t2. Sorted\n";
+        cout << "\t2. Sort\n";
         cout << "\t0. Exit\n";
         cout << "\tEnter choice: ";
         cin >> choice;
@@ -193,8 +210,8 @@ void displaySortOptionMenu(){
 	int choice;
     do {
 
-        cout << "\t\t1.Sorted Ascending\n";
-        cout << "\t\t2.Sorted Descending\n";
+        cout << "\t\t1. Ascending\n";
+        cout << "\t\t2. Descending\n";
         cout << "\t\t0. Exit\n";
         cout << "\t\tEnter choice: ";
         cin >> choice;
@@ -222,13 +239,17 @@ int choice;
     do {
 
         cout << "\t\t\t1.By Upload date\n";
+        cout << "\t\t\t2.By Views\n";
+        cout << "\t\t\t3.By Likes\n";
         cout << "\t\t\t0. Exit\n";
         cout << "\t\t\tEnter choice: ";
         cin >> choice;
         flushInput();
 		
         switch (choice) {
-            case 1: displaySortUploadDate(); return;
+            case 1: displaySortedByUploadDate(); return;
+            case 2: displaySortedByViews(); return;
+            case 3: displaySortedByLikes(); return;
             case 0: return;
             default: cout << "\t\t\tInvalid choice.\n";
         }
@@ -236,13 +257,11 @@ int choice;
     } while (choice != 0);	
 }
 
-void displaySortUploadDate(){
-	
+void displaySortedByUploadDate(){
 	if (allVideos.empty()) {
             cout << "Videos empty.\n";
          return;
     }
-    
 	sort(allVideos.begin(), allVideos.end(), sortByUploadDate);
 	
 	displayRowHeader();
@@ -251,8 +270,39 @@ void displaySortUploadDate(){
 		const VideoNode &v = allVideos[i];
 		
 		displayRowValues(v);
-	}
+	}	
+}
+
+void displaySortedByViews(){
+	if (allVideos.empty()) {
+            cout << "Videos empty.\n";
+         return;
+    }
+	sort(allVideos.begin(), allVideos.end(), sortByViews);
 	
+	displayRowHeader();
+	
+	for (size_t i = 0; i < allVideos.size(); ++i) {
+		const VideoNode &v = allVideos[i];
+		
+		displayRowValues(v);
+	}	
+}
+
+void displaySortedByLikes(){
+	if (allVideos.empty()) {
+            cout << "Videos empty.\n";
+         return;
+    }
+	sort(allVideos.begin(), allVideos.end(), sortByLikes);
+	
+	displayRowHeader();
+	
+	for (size_t i = 0; i < allVideos.size(); ++i) {
+		const VideoNode &v = allVideos[i];
+		
+		displayRowValues(v);
+	}	
 }
 
 void displayRowHeader(){
