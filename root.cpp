@@ -38,14 +38,17 @@ void addChannel();
 void addVideoToChannel(); 
 void addVideosHelper(ChannelNode& c, VideoNode v);
 void addPredefinedChannels();
-void menuDisplay();
-void menuDisplaySort();
-void menuDisplaySortAscending();
-void displaySortUploadDate();
+
+void displayMenu();
+void displaySortMenu();
+void displaySortAscendingMenu();
 void displayAll(); 
-int findChannelIndexById(int id); 
+void displaySortUploadDate();
 void displayRowHeader();
 void displayRowValues(const VideoNode &v);
+
+int findChannelIndexById(int id); 
+
 bool sortByUploadDate(const VideoNode &a, const VideoNode &b);
 
                      // MAIN
@@ -165,7 +168,7 @@ void addVideoToChannel() {
  
 }
 
-void menuDisplay() {
+void displayMenu() {
 	int choice;
     do {
         cout << "\tDisplay: \n";
@@ -185,7 +188,7 @@ void menuDisplay() {
         
     } while (choice != 0);
 }
-void menuDisplaySort(){ // I QUIT HERE. DO THE SORTED DESCENDING LATER.
+void displaySortMenu(){ // I QUIT HERE. DO THE SORTED DESCENDING LATER.
 	int choice;
     do {
 
@@ -203,7 +206,7 @@ void menuDisplaySort(){ // I QUIT HERE. DO THE SORTED DESCENDING LATER.
         
     } while (choice != 0);
 }
-void menuDisplaySortAscending(){
+void displaySortAscendingMenu(){
 int choice;
     do {
 
