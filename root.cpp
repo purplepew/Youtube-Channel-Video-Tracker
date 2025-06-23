@@ -40,8 +40,9 @@ void addVideosHelper(ChannelNode& c, VideoNode v);
 void addPredefinedChannels();
 
 void displayMenu();
+void displaySortOptionMenu();
 void displaySortMenu();
-void displaySortAscendingMenu();
+
 void displayAll(); 
 void displaySortUploadDate();
 void displayRowHeader();
@@ -51,7 +52,7 @@ int findChannelIndexById(int id);
 
 bool sortByUploadDate(const VideoNode &a, const VideoNode &b);
 
-                     // MAIN
+// MAIN
 int main() {
 	addPredefinedChannels(); // Load initial channels and videos
 	
@@ -70,7 +71,7 @@ int main() {
         switch (choice) {
             case 1: addChannel(); break;
             case 2: addVideoToChannel(); break;
-            case 3: menuDisplay(); break;
+            case 3: displayMenu(); break;
             case 0: cout << "Goodbye!\n"; break;
             default: cout << "Invalid choice.\n";
         }
@@ -84,8 +85,7 @@ int main() {
     return 0;
 }
 
-                  // FUNCTIONSSSSSS
-
+// FUNCTIONSSSSSS
 bool sortByUploadDate(const VideoNode &a, const VideoNode &b) {
 	   return ascending ? (a.uploadDate < b.uploadDate) : (a.uploadDate > b.uploadDate);
 } 
@@ -181,32 +181,43 @@ void displayMenu() {
 		
         switch (choice) {
             case 1: displayAll(); return;
-            case 2: menuDisplaySort(); return;
+            case 2: displaySortOptionMenu(); return;
             case 0: return;
             default: cout << "\tInvalid choice.\n";
         }
         
     } while (choice != 0);
 }
-void displaySortMenu(){ // I QUIT HERE. DO THE SORTED DESCENDING LATER.
+
+void displaySortOptionMenu(){ 
 	int choice;
     do {
 
         cout << "\t\t1.Sorted Ascending\n";
+        cout << "\t\t2.Sorted Descending\n";
         cout << "\t\t0. Exit\n";
         cout << "\t\tEnter choice: ";
         cin >> choice;
         flushInput();
 		
         switch (choice) {
-            case 1: menuDisplaySortAscending(); return;
-            case 0: return;
+            case 1: 
+				ascending = true;
+				displaySortMenu(); 
+				return;
+			case 2:
+				ascending = false;
+				displaySortMenu();
+				return;
+            case 0:
+				 return;
             default: cout << "\t\tInvalid choice.\n";
         }
         
     } while (choice != 0);
 }
-void displaySortAscendingMenu(){
+
+void displaySortMenu(){
 int choice;
     do {
 
@@ -224,6 +235,7 @@ int choice;
         
     } while (choice != 0);	
 }
+
 void displaySortUploadDate(){
 	
 	if (allVideos.empty()) {
