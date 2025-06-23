@@ -23,7 +23,7 @@ struct ChannelNode {
     int channelId;
     string channelName;
     string ownerName;
-    vector<VideoNode> videos; // An array of VideoNode
+    vector<VideoNode> videos; // An array of VideoNode property
 }; 
 
 vector<ChannelNode> channels; // Holds all channel entries in memory.
@@ -52,7 +52,8 @@ void displaySortOptionMenu();
 void displaySortMenu();
 
 // search
-int findChannelIndexById(int id); 
+int findChannelIndexById(int id);
+int findVideoIndexById(int id);
 
 // helper functions
 void displayRowHeader();
@@ -128,11 +129,46 @@ int findChannelIndexById(int id) {
     for (size_t i = 0; i < channels.size(); ++i) {
         if (channels[i].channelId == id) return static_cast<int>(i); // convert i with a data type of size_t to int
     }
-    return -1;
+    return -1; // id not found
 }
 
 int findVideoIndexById(int id) {
+	ascending = true;
+	sort(allVideos.begin(), allVideos.end(), sortById);
 	
+	int left = 0;
+	int right = allVideos.size() - 1;
+	
+	while(left <= right){
+		int middle = (left+right) / 2;
+		
+		if(allVideos[middle].videoId == id) 
+			return middle;
+		else if(allVideos[middle].videoId > id) 
+			right = middle - 1;
+		else 
+			left = middle + 1;
+	}
+	return -1; // id not found
+}
+
+void displayVideo(){
+	
+	int id;
+	cout<<"Enter Video ID: ";
+	cin>>id;
+	flushInput();
+	
+	int index = findVideoIndexById(id);
+	
+	if (index == -1) {
+        cout << "Video not found!\n";
+        return;
+    }
+    
+    VideoNode v = allVideos[index];
+    displayRowHeader();
+    displayRowValues(v);
 }
 
 void displayMenu() {
@@ -141,6 +177,7 @@ void displayMenu() {
         cout << "\tDisplay: \n";
         cout << "\t1. Display All\n";
         cout << "\t2. Sort\n";
+        cout << "\t3. Find video\n";
         cout << "\t0. Exit\n";
         cout << "\tEnter choice: ";
         cin >> choice;
@@ -149,6 +186,7 @@ void displayMenu() {
         switch (choice) {
             case 1: displayAll(); return;
             case 2: displaySortOptionMenu(); return;
+            case 3: displayVideo(); return;
             case 0: return;
             default: cout << "\tInvalid choice.\n";
         }
