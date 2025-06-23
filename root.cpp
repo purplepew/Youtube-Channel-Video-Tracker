@@ -148,6 +148,7 @@ void addVideoToChannel() {
 }
 
 void displayAll() {
+	
     for (size_t i = 0; i < channels.size(); ++i) {
         const ChannelNode &ch = channels[i];  
         cout <<"\n" <<string(71, '=') << "\n";
@@ -166,7 +167,7 @@ void displayAll() {
         cout << left       // align the string to the left
         	 << setw(2) << "-"     // setw(num characters wide column) 
              << setw(8)  << "ID"
-             << setw(25) << "Title"
+             << setw(30) << "Title"
              << setw(12) << "Upload Date"
              << setw(8)  << "Views"
              << setw(8)  << "Likes"
@@ -180,7 +181,7 @@ void displayAll() {
             cout << left
             	 << setw(2) << "-"
                  << setw(8)  << v.videoId
-                 << setw(25) << v.title
+                 << setw(30) << (v.title.length() > 25 ? v.title.substr(0, 25) + "..." : v.title) // Title with more than 25 will be sliced
                  << setw(12) << v.uploadDate
                  << setw(8)  << v.views
                  << setw(8)  << v.likes
@@ -198,7 +199,7 @@ void addPredefinedChannels() {
     ch1.ownerName = "Alice";
 
     VideoNode v1a = {101, "Intro to C++", "2025-06-01", 1000, 250, 40};
-    VideoNode v1b = {102, "OOP Concepts", "2025-06-03", 800, 210, 30};
+    VideoNode v1b = {102, "OOP Concepts and OOP Concepts and OOP Concepts", "2025-06-03", 800, 210, 30};
     ch1.videos.push_back(v1a);
     ch1.videos.push_back(v1b);
     channels.push_back(ch1);
