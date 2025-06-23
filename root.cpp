@@ -44,7 +44,8 @@ void displaySortedByUploadDate();
 void displaySortedByViews();
 void displaySortedByLikes();
 void displaySortedByComments();
-void displaySortedById(); 
+void displaySortedById();
+void displayVideo();
 
 // menus
 void displayMenu();
@@ -74,6 +75,7 @@ int main() {
     int choice;
     do {
     	system("cls");
+
         cout << "\n--- YouTube Channel Video Tracker ---\n";
         cout << "1. Add Channel\n";
         cout << "2. Add Video to Channel\n";
@@ -103,6 +105,12 @@ int main() {
 void flushInput() {
     cin.clear(); // useful when cin fails (when users enter letter when a number is expected).
     cin.ignore(numeric_limits<streamsize>::max(), '\n'); // This prevents leftover input such as newline. Basta just use this after using cin>>
+}
+
+string toLower(string str) {
+    for (size_t i = 0; i < str.length(); ++i)
+        str[i] = tolower(str[i]);
+    return str;
 }
 
 bool sortByUploadDate(const VideoNode &a, const VideoNode &b) {
@@ -152,6 +160,32 @@ int findVideoIndexById(int id) {
 	return -1; // id not found
 }
 
+void searchVideosByTitle() {
+	
+    string input;
+    cout << "Enter title keyword to search: ";
+    getline(cin, input);
+
+    string keyword = toLower(input);
+    bool found = false;
+    
+	displayRowHeader();
+	
+    for (size_t i = 0; i < allVideos.size(); ++i) {
+    
+        string videoTitleLower = toLower(allVideos[i].title);
+        
+        if (videoTitleLower.find(keyword) != string::npos) {
+            found = true;
+            displayRowValues(allVideos[i]);
+        }
+    }
+
+    if (!found) {
+        cout << "No videos matched your search.\n";
+    }
+}
+
 void displayVideo(){
 	
 	int id;
@@ -172,12 +206,14 @@ void displayVideo(){
 }
 
 void displayMenu() {
+
 	int choice;
     do {
         cout << "\tDisplay: \n";
         cout << "\t1. Display All\n";
         cout << "\t2. Sort\n";
-        cout << "\t3. Find video\n";
+        cout << "\t3. Find video by id\n";
+        cout << "\t4. Find video by title\n";
         cout << "\t0. Exit\n";
         cout << "\tEnter choice: ";
         cin >> choice;
@@ -187,6 +223,7 @@ void displayMenu() {
             case 1: displayAll(); return;
             case 2: displaySortOptionMenu(); return;
             case 3: displayVideo(); return;
+            case 4: searchVideosByTitle(); return;
             case 0: return;
             default: cout << "\tInvalid choice.\n";
         }
