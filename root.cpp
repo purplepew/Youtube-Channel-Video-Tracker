@@ -7,7 +7,7 @@
 #include <algorithm>
 using namespace std;
 
-// Represents a video with its properties.
+// video properties
 struct VideoNode {
     int videoId;
     string title;
@@ -27,13 +27,12 @@ struct ChannelNode {
 }; 
 
 vector<ChannelNode> channels; // Holds all channel entries in memory.
-vector<VideoNode> allVideos; // Holds all the videos in every channel.
+vector<VideoNode> allVideos; // Holds all the videos from every channel.
 int CHANNEL_ID = 500; // starting value of the ids. I will increment them every channel or video created.
 int VIDEO_ID = 500;
 bool ascending = true; //global flag. Will be used when user is prompted Descending or Ascending in Menus. and we will base the sorting according to this value.
 
 void flushInput(); // Clears input buffer
-
 
 void addChannel(); 
 void addVideoToChannel(); 
@@ -85,8 +84,7 @@ int main() {
             default: cout << "Invalid choice.\n";
         }
         
-      
-        cout << "--> OK. Press any key to continue. ";
+        cout << "\t > OK. Press any key to continue. ";
     	getch();
         
     } while (choice != 0);
@@ -96,15 +94,15 @@ int main() {
 
 // FUNCTIONSSSSSS
 bool sortByUploadDate(const VideoNode &a, const VideoNode &b) {
-	   return ascending ? (a.uploadDate < b.uploadDate) : (a.uploadDate > b.uploadDate);
+	return ascending ? (a.uploadDate < b.uploadDate) : (a.uploadDate > b.uploadDate);
 } 
 
 bool sortByViews(const VideoNode &a, const VideoNode &b) {
-	   return ascending ? (a.views < b.views) : (a.views > b.views);
+	return ascending ? (a.views < b.views) : (a.views > b.views);
 } 
 
 bool sortByLikes(const VideoNode &a, const VideoNode &b) {
-	   return ascending ? (a.likes < b.likes) : (a.likes > b.likes);
+	return ascending ? (a.likes < b.likes) : (a.likes > b.likes);
 } 
 
 void flushInput() {
@@ -308,8 +306,6 @@ void displaySortedByLikes(){
 }
 
 void displayRowHeader(){
-		 // row header
-        cout << "\nVideos Sorted Ascending Order By Upload Date:\n";
         cout << left       // align the strings to the left
         	 << setw(2) << "-"     // setw(num characters wide column) 
              << setw(8)  << "ID"
@@ -319,7 +315,6 @@ void displayRowHeader(){
              << setw(8)  << "Likes"
              << setw(10) << "Comments" 
 			 << setw(10) << "Channel Name" << endl;
-
         cout << string(100, '-') << endl;
 }
 
@@ -349,10 +344,9 @@ void displayAll() {
             continue;
         }
 
-		 // Display videos
-		 // row header
+	
         cout << "\nVideos:\n";
-        
+        //row header
         displayRowHeader();
         
 		// row values
