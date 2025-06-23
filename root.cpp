@@ -43,7 +43,8 @@ void displayAll();
 void displaySortedByUploadDate();
 void displaySortedByViews();
 void displaySortedByLikes();
-void displaySortedByComments(); 
+void displaySortedByComments();
+void displaySortedById(); 
 
 // menus
 void displayMenu();
@@ -63,6 +64,7 @@ bool sortByUploadDate(const VideoNode &a, const VideoNode &b);
 bool sortByViews(const VideoNode &a, const VideoNode &b);
 bool sortByLikes(const VideoNode &a, const VideoNode &b);
 bool sortByComments(const VideoNode &a, const VideoNode &b);
+bool sortById(const VideoNode &a, const VideoNode &b);
 
 // MAIN
 int main() {
@@ -97,6 +99,11 @@ int main() {
 }
 
 // FUNCTIONSSSSSS
+void flushInput() {
+    cin.clear(); // useful when cin fails (when users enter letter when a number is expected).
+    cin.ignore(numeric_limits<streamsize>::max(), '\n'); // This prevents leftover input such as newline. Basta just use this after using cin>>
+}
+
 bool sortByUploadDate(const VideoNode &a, const VideoNode &b) {
 	return ascending ? (a.uploadDate < b.uploadDate) : (a.uploadDate > b.uploadDate);
 } 
@@ -113,16 +120,19 @@ bool sortByComments(const VideoNode &a, const VideoNode &b) {
 	return ascending ? (a.comments < b.comments) : (a.comments > b.comments);
 } 
 
-void flushInput() {
-    cin.clear(); // useful when cin fails (when users enter letter when a number is expected).
-    cin.ignore(numeric_limits<streamsize>::max(), '\n'); // This prevents leftover input such as newline. Basta just use this after using cin>>
-}
+bool sortById(const VideoNode &a, const VideoNode &b) {
+	return ascending ? (a.videoId  < b.videoId) : (a.videoId > b.videoId);
+} 
 
 int findChannelIndexById(int id) {
     for (size_t i = 0; i < channels.size(); ++i) {
         if (channels[i].channelId == id) return static_cast<int>(i); // convert i with a data type of size_t to int
     }
     return -1;
+}
+
+int findVideoIndexById(int id) {
+	
 }
 
 void displayMenu() {
@@ -182,6 +192,7 @@ int choice;
         cout << "\t\t\t2.By Views\n";
         cout << "\t\t\t3.By Likes\n";
         cout << "\t\t\t4.By Comments\n";
+        cout << "\t\t\t5.By Id\n";
         cout << "\t\t\t0. Exit\n";
         cout << "\t\t\tEnter choice: ";
         cin >> choice;
@@ -192,6 +203,7 @@ int choice;
             case 2: displaySortedByViews(); return;
             case 3: displaySortedByLikes(); return;
             case 4: displaySortedByComments(); return;
+            case 5: displaySortedById(); return;
             case 0: return;
             default: cout << "\t\t\tInvalid choice.\n";
         }
@@ -253,6 +265,22 @@ void displaySortedByComments(){
          return;
     }
 	sort(allVideos.begin(), allVideos.end(), sortByComments);
+	
+	displayRowHeader();
+	
+	for (size_t i = 0; i < allVideos.size(); ++i) {
+		const VideoNode &v = allVideos[i];
+		
+		displayRowValues(v);
+	}	
+}
+
+void displaySortedById(){
+	if (allVideos.empty()) {
+            cout << "Videos empty.\n";
+         return;
+    }
+	sort(allVideos.begin(), allVideos.end(), sortById);
 	
 	displayRowHeader();
 	
