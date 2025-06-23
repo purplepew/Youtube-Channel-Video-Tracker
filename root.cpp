@@ -178,6 +178,8 @@ void addVideoToChannel() {
     cout << "Enter Number of Comments: ";
     cin >> v.comments;
     flushInput();
+    
+    v.channelName = channels[index].channelName;
 
     channels[index].videos.push_back(v);
     allVideos.push_back(v);
@@ -318,7 +320,7 @@ void displayRowHeader(){
              << setw(10) << "Comments" 
 			 << setw(10) << "Channel Name" << endl;
 
-        cout << string(88, '-') << endl;
+        cout << string(100, '-') << endl;
 }
 
 void displayRowValues(const VideoNode &v){
@@ -337,7 +339,7 @@ void displayAll() {
 	
     for (size_t i = 0; i < channels.size(); ++i) {
         const ChannelNode &ch = channels[i];  
-        cout <<"\n" <<string(88, '=') << "\n";
+        cout <<"\n" <<string(100, '=') << "\n";
         cout << "Channel ID   : " << ch.channelId << endl;
         cout << "Channel Name : \033[31m" << ch.channelName <<"\033[0m"<< endl;  // "\033[31m" color text to red. "\033[0m" reset the color
         cout << "Owner Name   : " << ch.ownerName << endl;
@@ -360,7 +362,7 @@ void displayAll() {
             displayRowValues(v);
         }
     }
-    cout <<"\n" <<string(88, '=') << "\n";
+    cout <<"\n" <<string(100, '=') << "\n";
 }
 
 void addVideosHelper(ChannelNode& c, VideoNode v){ // "&" means pass by reference -- does not re-copy the entire array. 
