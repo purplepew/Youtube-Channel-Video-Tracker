@@ -38,11 +38,12 @@ void addChannel();
 void addVideoToChannel(); 
 void addPredefinedChannels();
  
-// display datas in table
+// display datas in table format
 void displayAll(); 
 void displaySortedByUploadDate();
 void displaySortedByViews();
 void displaySortedByLikes();
+void displaySortedByComments(); 
 
 // menus
 void displayMenu();
@@ -59,6 +60,9 @@ void addVideosHelper(ChannelNode& c, VideoNode v);
 
 // sort
 bool sortByUploadDate(const VideoNode &a, const VideoNode &b);
+bool sortByViews(const VideoNode &a, const VideoNode &b);
+bool sortByLikes(const VideoNode &a, const VideoNode &b);
+bool sortByComments(const VideoNode &a, const VideoNode &b);
 
 // MAIN
 int main() {
@@ -84,7 +88,7 @@ int main() {
             default: cout << "Invalid choice.\n";
         }
         
-        cout << "\t > OK. Press any key to continue. ";
+        cout << "\n\t > OK. Press any key to continue. ";
     	getch();
         
     } while (choice != 0);
@@ -105,25 +109,13 @@ bool sortByLikes(const VideoNode &a, const VideoNode &b) {
 	return ascending ? (a.likes < b.likes) : (a.likes > b.likes);
 } 
 
+bool sortByComments(const VideoNode &a, const VideoNode &b) {
+	return ascending ? (a.comments < b.comments) : (a.comments > b.comments);
+} 
+
 void flushInput() {
     cin.clear(); // useful when cin fails (when users enter letter when a number is expected).
     cin.ignore(numeric_limits<streamsize>::max(), '\n'); // This prevents leftover input such as newline. Basta just use this after using cin>>
-}
-
-void addChannel() {
-	
-    ChannelNode ch;
-    
-    ch.channelId = CHANNEL_ID++;
-    
-    cout << "Enter Channel Name: ";
-    getline(cin, ch.channelName);
-    cout << "Enter Owner Name: ";
-    getline(cin, ch.ownerName);
-    
-    channels.push_back(ch);
-    cout << "Channel added successfully!\n";
-    
 }
 
 int findChannelIndexById(int id) {
@@ -131,58 +123,6 @@ int findChannelIndexById(int id) {
         if (channels[i].channelId == id) return static_cast<int>(i); // convert i with a data type of size_t to int
     }
     return -1;
-}
-
-void addVideoToChannel() {
-	
-	if (channels.empty()) {
-       cout<<"No channels available! Please add a channel first."<<endl;
-        return;
-    }
-    
-    // Display available channels
-    cout << "Available Channels:\n";
-    cout << string(50, '-') << "\n";
-    for (size_t i = 0; i < channels.size(); ++i) {
-        cout << "ID: " << channels[i].channelId 
-             << " | Name: " << channels[i].channelName 
-             << " | Owner: " << channels[i].ownerName << "\n";
-    }
-    cout << string(50, '-') << "\n";
-	
-    int chId;
-    cout << "Enter Channel ID to add video to: ";
-    cin >> chId;
-    flushInput();
-
-    int index = findChannelIndexById(chId);
-    if (index == -1) {
-        cout << "Channel not found!\n";
-        return;
-    }
-
-    VideoNode v;
-    
-    v.videoId = VIDEO_ID++;
-  
-    cout << "Enter Title: ";
-    getline(cin, v.title);
-    cout << "Enter Upload Date 'yyyy-mm-dd': ";
-    getline(cin, v.uploadDate);
-    cout << "Enter Views: ";
-    cin >> v.views;
-    cout << "Enter Likes: ";
-    cin >> v.likes;
-    cout << "Enter Number of Comments: ";
-    cin >> v.comments;
-    flushInput();
-    
-    v.channelName = channels[index].channelName;
-
-    channels[index].videos.push_back(v);
-    allVideos.push_back(v);
-    cout << "Video added to channel successfully!\n";
- 
 }
 
 void displayMenu() {
@@ -241,6 +181,7 @@ int choice;
         cout << "\t\t\t1.By Upload date\n";
         cout << "\t\t\t2.By Views\n";
         cout << "\t\t\t3.By Likes\n";
+        cout << "\t\t\t4.By Comments\n";
         cout << "\t\t\t0. Exit\n";
         cout << "\t\t\tEnter choice: ";
         cin >> choice;
@@ -250,6 +191,7 @@ int choice;
             case 1: displaySortedByUploadDate(); return;
             case 2: displaySortedByViews(); return;
             case 3: displaySortedByLikes(); return;
+            case 4: displaySortedByComments(); return;
             case 0: return;
             default: cout << "\t\t\tInvalid choice.\n";
         }
@@ -295,6 +237,22 @@ void displaySortedByLikes(){
          return;
     }
 	sort(allVideos.begin(), allVideos.end(), sortByLikes);
+	
+	displayRowHeader();
+	
+	for (size_t i = 0; i < allVideos.size(); ++i) {
+		const VideoNode &v = allVideos[i];
+		
+		displayRowValues(v);
+	}	
+}
+
+void displaySortedByComments(){
+	if (allVideos.empty()) {
+            cout << "Videos empty.\n";
+         return;
+    }
+	sort(allVideos.begin(), allVideos.end(), sortByComments);
 	
 	displayRowHeader();
 	
@@ -357,6 +315,73 @@ void displayAll() {
         }
     }
     cout <<"\n" <<string(100, '=') << "\n";
+}
+
+void addVideoToChannel() {
+	
+	if (channels.empty()) {
+       cout<<"No channels available! Please add a channel first."<<endl;
+        return;
+    }
+    
+    // Display available channels
+    cout << "Available Channels:\n";
+    cout << string(50, '-') << "\n";
+    for (size_t i = 0; i < channels.size(); ++i) {
+        cout << "ID: " << channels[i].channelId 
+             << " | Name: " << channels[i].channelName 
+             << " | Owner: " << channels[i].ownerName << "\n";
+    }
+    cout << string(50, '-') << "\n";
+	
+    int chId;
+    cout << "Enter Channel ID to add video to: ";
+    cin >> chId;
+    flushInput();
+
+    int index = findChannelIndexById(chId);
+    if (index == -1) {
+        cout << "Channel not found!\n";
+        return;
+    }
+
+    VideoNode v;
+    
+    v.videoId = VIDEO_ID++;
+  
+    cout << "Enter Title: ";
+    getline(cin, v.title);
+    cout << "Enter Upload Date 'yyyy-mm-dd': ";
+    getline(cin, v.uploadDate);
+    cout << "Enter Views: ";
+    cin >> v.views;
+    cout << "Enter Likes: ";
+    cin >> v.likes;
+    cout << "Enter Number of Comments: ";
+    cin >> v.comments;
+    flushInput();
+    
+    v.channelName = channels[index].channelName;
+
+    channels[index].videos.push_back(v);
+    allVideos.push_back(v);
+    cout << "Video added to channel successfully!\n";
+ 
+}
+
+void addChannel() {
+    ChannelNode ch;
+    
+    ch.channelId = CHANNEL_ID++;
+    
+    cout << "Enter Channel Name: ";
+    getline(cin, ch.channelName);
+    cout << "Enter Owner Name: ";
+    getline(cin, ch.ownerName);
+    
+    channels.push_back(ch);
+    cout << "Channel added successfully!\n";
+    
 }
 
 void addVideosHelper(ChannelNode& c, VideoNode v){ // "&" means pass by reference -- does not re-copy the entire array. 
