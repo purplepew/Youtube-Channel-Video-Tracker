@@ -1,10 +1,10 @@
 #include <iostream>
 #include <vector>
 #include <string>
-#include <limits>
-#include <iomanip>
-#include <conio.h>
-#include <algorithm>
+#include <limits> // Required for std::numeric_limits in flushing inputs
+#include <iomanip> // for setw() only
+#include <conio.h> // for getch() only
+#include <algorithm> // for sort() only
 using namespace std;
 
 // video properties
@@ -23,7 +23,7 @@ struct ChannelNode {
     int channelId;
     string channelName;
     string ownerName;
-    vector<VideoNode> videos; // An array of VideoNode property
+    vector<VideoNode> videos; // An array of videos with the property of VideoNode
 }; 
 
 vector<ChannelNode> channels; // Holds all channel entries in memory.
@@ -51,17 +51,18 @@ void displayVideo();
 void displayMenu();
 void displaySortOptionMenu();
 void displaySortMenu();
+void displayFindMenu();
 
 // search
-int findChannelIndexById(int id);
-int findVideoIndexById(int id);
+int findChannelIndexById(int id); // used mapping for every channel
+int findVideoIndexById(int id); // used binary search
 
 // helper functions
 void displayRowHeader();
 void displayRowValues(const VideoNode &v);
 void addVideosHelper(ChannelNode& c, VideoNode v);
 
-// sort
+// sort logic
 bool sortByUploadDate(const VideoNode &a, const VideoNode &b);
 bool sortByViews(const VideoNode &a, const VideoNode &b);
 bool sortByLikes(const VideoNode &a, const VideoNode &b);
@@ -110,11 +111,11 @@ void flushInput() {
 string toLower(string str) {
     for (size_t i = 0; i < str.length(); ++i)
         str[i] = tolower(str[i]);
-    return str;
+    return str; // returns all lowercased letter of a word
 }
 
 bool sortByUploadDate(const VideoNode &a, const VideoNode &b) {
-	return ascending ? (a.uploadDate < b.uploadDate) : (a.uploadDate > b.uploadDate);
+	return ascending ? (a.uploadDate < b.uploadDate) : (a.uploadDate > b.uploadDate); // When this function returns true, "a" comes before "b" in the sorted list
 } 
 
 bool sortByViews(const VideoNode &a, const VideoNode &b) {
@@ -142,7 +143,7 @@ int findChannelIndexById(int id) {
 
 int findVideoIndexById(int id) {
 	ascending = true;
-	sort(allVideos.begin(), allVideos.end(), sortById);
+	sort(allVideos.begin(), allVideos.end(), sortById); // Sorts allVideos using sortById to compare items.
 	
 	int left = 0;
 	int right = allVideos.size() - 1;
@@ -166,18 +167,18 @@ void searchVideosByTitle() {
     cout << "Enter title keyword to search: ";
     getline(cin, input);
 
-    string keyword = toLower(input);
+    string keyword = toLower(input); // var keyword is lowercased input
     bool found = false;
     
 	displayRowHeader();
 	
     for (size_t i = 0; i < allVideos.size(); ++i) {
     
-        string videoTitleLower = toLower(allVideos[i].title);
+        string videoTitleLower = toLower(allVideos[i].title); // current video's video title is lowercased
         
-        if (videoTitleLower.find(keyword) != string::npos) {
+        if (videoTitleLower.find(keyword) != string::npos) { // check if keyword exists in the video title
             found = true;
-            displayRowValues(allVideos[i]);
+            displayRowValues(allVideos[i]); // will cout the video's properties using displayRowValues()
         }
     }
 
@@ -186,7 +187,7 @@ void searchVideosByTitle() {
     }
 }
 
-void displayVideo(){
+void displayVideo(){ // displays standalone video. needs an id
 	
 	int id;
 	cout<<"Enter Video ID: ";
@@ -206,14 +207,12 @@ void displayVideo(){
 }
 
 void displayMenu() {
-
 	int choice;
     do {
         cout << "\tDisplay: \n";
         cout << "\t1. Display All\n";
         cout << "\t2. Sort\n";
-        cout << "\t3. Find video by id\n";
-        cout << "\t4. Find video by title\n";
+        cout << "\t3. Find\n";
         cout << "\t0. Exit\n";
         cout << "\tEnter choice: ";
         cin >> choice;
@@ -222,8 +221,7 @@ void displayMenu() {
         switch (choice) {
             case 1: displayAll(); return;
             case 2: displaySortOptionMenu(); return;
-            case 3: displayVideo(); return;
-            case 4: searchVideosByTitle(); return;
+            case 3: displayFindMenu(); return;
             case 0: return;
             default: cout << "\tInvalid choice.\n";
         }
@@ -231,7 +229,7 @@ void displayMenu() {
     } while (choice != 0);
 }
 
-void displaySortOptionMenu(){ 
+void displaySortOptionMenu(){ // when sort option is selected.
 	int choice;
     do {
 
@@ -259,7 +257,7 @@ void displaySortOptionMenu(){
     } while (choice != 0);
 }
 
-void displaySortMenu(){
+void displaySortMenu(){ // when either ascending or descending is selected.
 int choice;
     do {
 
@@ -286,19 +284,39 @@ int choice;
     } while (choice != 0);	
 }
 
+void displayFindMenu(){ // when "find" is selected in the menu
+	int choice;
+    do {
+        cout << "\t\t1. Find By Title\n";
+        cout << "\t\t2. Find By ID\n";
+        cout << "\t\t0. Exit\n";
+        cout << "\t\tEnter choice: ";
+        cin >> choice;
+        flushInput();
+		
+        switch (choice) {
+            case 1: searchVideosByTitle(); return;
+            case 2: displayVideo(); return;
+            case 0: return;
+            default: cout << "\t\tInvalid choice.\n";
+        }
+        
+    } while (choice != 0);
+}
+
 void displaySortedByUploadDate(){
 	if (allVideos.empty()) {
             cout << "Videos empty.\n";
          return;
-    }
-	sort(allVideos.begin(), allVideos.end(), sortByUploadDate);
+    } 
+	sort(allVideos.begin(), allVideos.end(), sortByUploadDate); // will sort base on global variable "ascending"
 	
 	displayRowHeader();
 	
-	for (size_t i = 0; i < allVideos.size(); ++i) {
-		const VideoNode &v = allVideos[i];
-		
-		displayRowValues(v);
+	for (size_t i = 0; i < allVideos.size(); ++i) { //maps every videos
+		const VideoNode &v = allVideos[i]; // stored inside a readonly variable named "v".
+										// "&" directly points at VideoNode object located at index "i". so not creating a new object
+		displayRowValues(v); // cout video properties in an awesome table row
 	}	
 }
 
@@ -407,14 +425,14 @@ void displayAll() {
 
 	
         cout << "\nVideos:\n";
-        //row header
-        displayRowHeader();
         
-		// row values
+        displayRowHeader(); //row header
+        
+		
         for (size_t j = 0; j < ch.videos.size(); ++j) {
             const VideoNode &v = ch.videos[j];
             
-            displayRowValues(v);
+            displayRowValues(v); // row values
         }
     }
     cout <<"\n" <<string(100, '=') << "\n";
