@@ -468,6 +468,188 @@ void displaySortedById(){
 	}	
 }
 
+void updateVideoTitle() {
+    cout << "\n--- Update Video Title ---\n";
+    int id;
+    cout << "Enter Video ID to update title: ";
+    cin >> id;
+    flushInput();
+
+    int allVideosIndex = findVideoIndexById(id); // get the videos' index from global allVideos vector.
+
+    if (allVideosIndex == -1) {
+        cout << "Video not found!\n";
+        return;
+    }
+
+    // Get a reference to the video in the global allVideos vector
+    VideoNode& videoToUpdateGlobal = allVideos[allVideosIndex];
+
+    // Find the corresponding video in its channel's video list
+    int channelIdx = findChannelIndexByName(videoToUpdateGlobal.channelName);
+    int videoInChannelIdx = -1;
+    if (channelIdx != -1) {
+        videoInChannelIdx = findVideoIndexInChannelById(channels[channelIdx], id);
+    }
+
+    if (channelIdx == -1 || videoInChannelIdx == -1) {
+        cout << "Error: Video found in global list but not in its channel. Data inconsistency.\n";
+        return; // Should ideally not happen with consistent data :)
+    }
+    
+    // Get a reference to the video in its channel's video vector
+    VideoNode& videoToUpdateInChannel = channels[channelIdx].videos[videoInChannelIdx];
+
+    cout << "Current Title: " << videoToUpdateGlobal.title << endl;
+    cout << "Enter New Title: "; // No option to leave blank if you want a change
+    string newTitle;
+    getline(cin, newTitle);
+
+    if (newTitle.empty()) {
+        cout << "Title cannot be empty. No update performed.\n";
+        return;
+    }
+
+    videoToUpdateGlobal.title = newTitle; // updates the video from allVideos
+    videoToUpdateInChannel.title = newTitle; // updates the video from the channel
+
+    cout << "Video title updated successfully!\n";
+}
+
+void updateChannelName() {
+	
+	if (channels.empty()){
+		cout<<"There are no channels."<<endl;
+		return;
+	}
+	
+	displayAvailableChannels();
+    
+    cout << "\n--- Update Channel Name ---\n";
+    int channelIdToUpdate;
+    cout << "Enter Channel ID to update: ";
+    cin >> channelIdToUpdate;
+    flushInput();
+
+    int channelIndex = findChannelIndexById(channelIdToUpdate);
+
+    if (channelIndex == -1) {
+        cout << "Channel not found!\n";
+        return;
+    }
+
+    // Get a reference to the channel being updated
+    ChannelNode& channelToUpdate = channels[channelIndex];
+    string oldChannelName = channelToUpdate.channelName;
+
+    cout << "Current Channel Name: " << oldChannelName << endl;
+    cout << "Enter New Channel Name: ";
+    string newChannelName;
+    getline(cin, newChannelName);
+
+    if (newChannelName.empty()) {
+        cout << "New channel name cannot be empty. No update performed.\n";
+        return;
+    }
+
+    // Check if the new name already exists for another channel
+    for (size_t i = 0; i < channels.size(); ++i) {
+        if (i != channelIndex && channels[i].channelName == newChannelName) {
+            cout << "Error: Channel name '" << newChannelName << "' already exists for another channel (ID: " << channels[i].channelId << ").\n";
+            return;
+        }
+    }
+
+    // Update the channel name in the ChannelNode itself
+    channelToUpdate.channelName = newChannelName;
+
+    // Update the channel name for all videos associated with this channel in the 'allVideos' list
+    for (size_t i = 0; i < allVideos.size(); ++i) {
+        if (allVideos[i].channelName == oldChannelName) {
+            allVideos[i].channelName = newChannelName;
+        }
+    }
+
+    // Update the channel name for all videos directly stored within this channel's 'videos' vector
+    for (size_t i = 0; i < channelToUpdate.videos.size(); ++i) {
+        channelToUpdate.videos[i].channelName = newChannelName;
+    }
+
+    cout << "Channel name updated successfully from '" << oldChannelName << "' to '" << newChannelName << "'!\n";
+}
+
+void deleteVideo() {
+    cout << "\n--- Delete Video ---\n";
+    int idToDelete;
+    cout << "Enter Video ID to delete: ";
+    cin >> idToDelete;
+    flushInput();
+
+    // Find the video in the global 'allVideos' list
+    int allVideosIndex = findVideoIndexById(idToDelete);
+
+    if (allVideosIndex == -1) {
+        cout << "Video not found!\n";
+        return;
+    }
+
+    // Get the channel name before removing from allVideos
+    string channelNameOfVideo = allVideos[allVideosIndex].channelName;
+
+    // Remove the video from the 'allVideos' global list
+    allVideos.erase(allVideos.begin() + allVideosIndex);
+
+    // Find the parent channel
+    int channelIndex = findChannelIndexByName(channelNameOfVideo);
+
+    // Find the video within its parent channel's video list
+    ChannelNode& parentChannel = channels[channelIndex]; // Get reference to modify
+    int videoInChannelIndex = findVideoIndexInChannelById(parentChannel, idToDelete);
+
+    // Remove the video from the channel's video list
+    parentChannel.videos.erase(parentChannel.videos.begin() + videoInChannelIndex);
+
+    cout << "Video with ID " << idToDelete << " deleted successfully." <<endl;
+}
+
+void deleteChannel() {
+	
+	if (channels.empty()){
+		cout<<"There are no channels."<<endl;
+		return;
+	}
+	
+	displayAvailableChannels();
+	
+    cout << "\n--- Delete Channel ---\n";
+    int idToDelete;
+    cout << "Enter Channel ID to delete: ";
+    cin >> idToDelete;
+    flushInput();
+
+    int channelIndex = findChannelIndexById(idToDelete);
+
+    if (channelIndex == -1) {
+        cout << "Channel not found!\n";
+        return;
+    }
+
+    // Get the name of the channel being deleted (needed for video cleanup)
+    string channelNameOfDeletedChannel = channels[channelIndex].channelName;
+
+    // Remove the channel from the 'channels' global list
+    channels.erase(channels.begin() + channelIndex);
+
+    // 2. Remove all videos associated with this channel from the 'allVideos' global list
+    for (int i = static_cast<int>(allVideos.size()) - 1; i >= 0; --i) {
+        if (allVideos[i].channelName == channelNameOfDeletedChannel) {
+            allVideos.erase(allVideos.begin() + i);
+        }
+    }
+
+    cout << "Channel ID " << idToDelete << " (named '" << channelNameOfDeletedChannel << "') and all its videos deleted successfully!\n";
+}
+
 void displayRowHeader(){
         cout << left       // align the strings to the left
         	 << setw(2) << "-"     // setw(num characters wide column) 
@@ -494,6 +676,12 @@ void displayRowValues(const VideoNode &v){
 }
 
 void displayAvailableChannels(){
+	
+	if (channels.empty()){
+		cout<<"There are no channels."<<endl;
+		return;
+	}
+	
 	// Display available channels
     cout << "\nAvailable Channels:\n";
     cout << string(50, '-') << "\n";
@@ -506,6 +694,11 @@ void displayAvailableChannels(){
 }
 
 void displayAll() {
+	
+	if (channels.empty()){
+		cout<<"There are no channels."<<endl;
+		return;
+	}
 	
     for (size_t i = 0; i < channels.size(); ++i) { // Loops every channel
         const ChannelNode &ch = channels[i];  
@@ -699,175 +892,5 @@ void addPredefinedChannels() {
     addVideosHelper(ch3, {309, "Flexibility & Stretching Guide", "2025-06-23", 1100, 280, 35, ch3.channelName});
     addVideosHelper(ch3, {310, "Bodyweight Workout Challenge", "2025-06-25", 2000, 510, 70, ch3.channelName});
     channels.push_back(ch3);
-}
-
-void updateVideoTitle() {
-    cout << "\n--- Update Video Title ---\n";
-    int id;
-    cout << "Enter Video ID to update title: ";
-    cin >> id;
-    flushInput();
-
-    int allVideosIndex = findVideoIndexById(id); // get the videos' index from global allVideos vector.
-
-    if (allVideosIndex == -1) {
-        cout << "Video not found!\n";
-        return;
-    }
-
-    // Get a reference to the video in the global allVideos vector
-    VideoNode& videoToUpdateGlobal = allVideos[allVideosIndex];
-
-    // Find the corresponding video in its channel's video list
-    int channelIdx = findChannelIndexByName(videoToUpdateGlobal.channelName);
-    int videoInChannelIdx = -1;
-    if (channelIdx != -1) {
-        videoInChannelIdx = findVideoIndexInChannelById(channels[channelIdx], id);
-    }
-
-    if (channelIdx == -1 || videoInChannelIdx == -1) {
-        cout << "Error: Video found in global list but not in its channel. Data inconsistency.\n";
-        return; // Should ideally not happen with consistent data :)
-    }
-    
-    // Get a reference to the video in its channel's video vector
-    VideoNode& videoToUpdateInChannel = channels[channelIdx].videos[videoInChannelIdx];
-
-    cout << "Current Title: " << videoToUpdateGlobal.title << endl;
-    cout << "Enter New Title: "; // No option to leave blank if you want a change
-    string newTitle;
-    getline(cin, newTitle);
-
-    if (newTitle.empty()) {
-        cout << "Title cannot be empty. No update performed.\n";
-        return;
-    }
-
-    videoToUpdateGlobal.title = newTitle; // updates the video from allVideos
-    videoToUpdateInChannel.title = newTitle; // updates the video from the channel
-
-    cout << "Video title updated successfully!\n";
-}
-
-void updateChannelName() {
-	displayAvailableChannels();
-    
-    cout << "\n--- Update Channel Name ---\n";
-    int channelIdToUpdate;
-    cout << "Enter Channel ID to update: ";
-    cin >> channelIdToUpdate;
-    flushInput();
-
-    int channelIndex = findChannelIndexById(channelIdToUpdate);
-
-    if (channelIndex == -1) {
-        cout << "Channel not found!\n";
-        return;
-    }
-
-    // Get a reference to the channel being updated
-    ChannelNode& channelToUpdate = channels[channelIndex];
-    string oldChannelName = channelToUpdate.channelName;
-
-    cout << "Current Channel Name: " << oldChannelName << endl;
-    cout << "Enter New Channel Name: ";
-    string newChannelName;
-    getline(cin, newChannelName);
-
-    if (newChannelName.empty()) {
-        cout << "New channel name cannot be empty. No update performed.\n";
-        return;
-    }
-
-    // Check if the new name already exists for another channel
-    for (size_t i = 0; i < channels.size(); ++i) {
-        if (i != channelIndex && channels[i].channelName == newChannelName) {
-            cout << "Error: Channel name '" << newChannelName << "' already exists for another channel (ID: " << channels[i].channelId << ").\n";
-            return;
-        }
-    }
-
-    // Update the channel name in the ChannelNode itself
-    channelToUpdate.channelName = newChannelName;
-
-    // Update the channel name for all videos associated with this channel in the 'allVideos' list
-    for (size_t i = 0; i < allVideos.size(); ++i) {
-        if (allVideos[i].channelName == oldChannelName) {
-            allVideos[i].channelName = newChannelName;
-        }
-    }
-
-    // Update the channel name for all videos directly stored within this channel's 'videos' vector
-    for (size_t i = 0; i < channelToUpdate.videos.size(); ++i) {
-        channelToUpdate.videos[i].channelName = newChannelName;
-    }
-
-    cout << "Channel name updated successfully from '" << oldChannelName << "' to '" << newChannelName << "'!\n";
-}
-
-void deleteVideo() {
-    cout << "\n--- Delete Video ---\n";
-    int idToDelete;
-    cout << "Enter Video ID to delete: ";
-    cin >> idToDelete;
-    flushInput();
-
-    // Find the video in the global 'allVideos' list
-    int allVideosIndex = findVideoIndexById(idToDelete);
-
-    if (allVideosIndex == -1) {
-        cout << "Video not found!\n";
-        return;
-    }
-
-    // Get the channel name before removing from allVideos
-    string channelNameOfVideo = allVideos[allVideosIndex].channelName;
-
-    // Remove the video from the 'allVideos' global list
-    allVideos.erase(allVideos.begin() + allVideosIndex);
-
-    // Find the parent channel
-    int channelIndex = findChannelIndexByName(channelNameOfVideo);
-
-    // Find the video within its parent channel's video list
-    ChannelNode& parentChannel = channels[channelIndex]; // Get reference to modify
-    int videoInChannelIndex = findVideoIndexInChannelById(parentChannel, idToDelete);
-
-    // Remove the video from the channel's video list
-    parentChannel.videos.erase(parentChannel.videos.begin() + videoInChannelIndex);
-
-    cout << "Video with ID " << idToDelete << " deleted successfully." <<endl;
-}
-
-void deleteChannel() {
-	displayAvailableChannels();
-	
-    cout << "\n--- Delete Channel ---\n";
-    int idToDelete;
-    cout << "Enter Channel ID to delete: ";
-    cin >> idToDelete;
-    flushInput();
-
-    int channelIndex = findChannelIndexById(idToDelete);
-
-    if (channelIndex == -1) {
-        cout << "Channel not found!\n";
-        return;
-    }
-
-    // Get the name of the channel being deleted (needed for video cleanup)
-    string channelNameOfDeletedChannel = channels[channelIndex].channelName;
-
-    // Remove the channel from the 'channels' global list
-    channels.erase(channels.begin() + channelIndex);
-
-    // 2. Remove all videos associated with this channel from the 'allVideos' global list
-    for (int i = static_cast<int>(allVideos.size()) - 1; i >= 0; --i) {
-        if (allVideos[i].channelName == channelNameOfDeletedChannel) {
-            allVideos.erase(allVideos.begin() + i);
-        }
-    }
-
-    cout << "Channel ID " << idToDelete << " (named '" << channelNameOfDeletedChannel << "') and all its videos deleted successfully!\n";
 }
 
