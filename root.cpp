@@ -2,9 +2,9 @@
 #include <vector>
 #include <string>
 #include <limits> // Required for std::numeric_limits in flushing inputs
-#include <iomanip> // for setw() only
-#include <conio.h> // for getch() only
-#include <algorithm> // for sort() only
+#include <iomanip> // needed for setw() only
+#include <conio.h> // needed for getch() only
+#include <algorithm> // needed sort() only
 using namespace std;
 
 // video properties
@@ -34,9 +34,21 @@ bool ascending = true; //global flag. Will be used when user is prompted Descend
 
 void flushInput(); // Clears input buffer
 
+// create
 void addChannel(); 
 void addVideoToChannel(); 
 void addPredefinedChannels();
+
+// search
+int findChannelIndexById(int id); // maps every element in 'channels'
+int findVideoIndexById(int id); // used binary search. find video's index in allVideos vector.
+int findChannelIndexByName(const string& name);    // Finds a channel's index in 'channels' vector by its name, or returns -1 if not found.
+int findVideoIndexInChannelById(const ChannelNode& channel, int videoId); // Finds a video's index within the given channel's video list by videoId, or returns -1.
+void searchVideosByTitle();
+
+// update
+void updateVideoTitle();
+void updateChannelName();
  
 // display datas in table format
 void displayAll(); 
@@ -52,17 +64,14 @@ void displayMenu();
 void displaySortOptionMenu();
 void displaySortMenu();
 void displayFindMenu();
-
-// search
-int findChannelIndexById(int id); // used mapping for every channel
-int findVideoIndexById(int id); // used binary search
+void displayUpdateMenu();
 
 // helper functions
 void displayRowHeader();
 void displayRowValues(const VideoNode &v);
 void addVideosHelper(ChannelNode& c, VideoNode v);
 
-// sort logic
+// sort logic for std::sort by algorithm library
 bool sortByUploadDate(const VideoNode &a, const VideoNode &b);
 bool sortByViews(const VideoNode &a, const VideoNode &b);
 bool sortByLikes(const VideoNode &a, const VideoNode &b);
@@ -78,10 +87,10 @@ int main() {
     	system("cls");
 
         cout << "\n--- YouTube Channel Video Tracker ---\n";
-        cout << "1. Add Channel\n";
+        cout << "1. Register New Channel\n";
         cout << "2. Add Video to Channel\n";
-        cout << "3. Display\n";
-        cout << "0. Exit\n";
+        cout << "3. View/Manage Data\n";
+        cout << "0. Exit Application\n";
         cout << "Enter choice: ";
         cin >> choice;
         flushInput();
@@ -114,6 +123,130 @@ string toLower(string str) {
     return str; // returns all lowercased letter of a word
 }
 
+void displayMenu() {
+	int choice;
+    do {
+    	cout<<"\t --- Content Management ---\n";
+        cout << "\t Display: \n";
+        cout << "\t 1. Show All Content\n";
+        cout << "\t 2. Sort Content\n";
+        cout << "\t 3. Find Content\n";
+        cout << "\t 4. Update Content\n";
+        cout << "\t 3. Delete Video\n";
+        cout << "\t 0. Go Back\n";
+        cout << "\t\nEnter choice: ";
+        cin >> choice;
+        flushInput();
+		
+        switch (choice) {
+            case 1: displayAll(); return;
+            case 2: displaySortOptionMenu(); return;
+            case 3: displayFindMenu(); return;
+            case 4: displayUpdateMenu(); return;
+            case 0: return;
+            default: cout << "\tInvalid choice.\n";
+        }
+        
+    } while (choice != 0);
+}
+
+void displaySortOptionMenu(){ // when sort option is selected.
+	int choice;
+    do {
+		cout<<"\t\t --- Select Sort Direction ---\n";	
+        cout << "\t\t1. Ascending\n";
+        cout << "\t\t2. Descending\n";
+        cout << "\t\t0. Go Back\n";
+        cout << "\t\t\nEnter choice: ";
+        cin >> choice;
+        flushInput();
+		
+        switch (choice) {
+            case 1: 
+				ascending = true;
+				displaySortMenu(); 
+				return;
+			case 2:
+				ascending = false;
+				displaySortMenu();
+				return;
+            case 0:
+				 return;
+            default: cout << "\t\tInvalid choice.\n";
+        }
+        
+    } while (choice != 0);
+}
+
+void displaySortMenu(){ // when either ascending or descending is selected.
+int choice;
+    do {
+		cout<<"\t\t\t--- Select Sort Criterion ---\n";
+        cout << "\t\t\t  1. Upload date\n";
+        cout << "\t\t\t  2. Views\n";
+        cout << "\t\t\t  3. Likes\n";
+        cout << "\t\t\t  4. Comments\n";
+        cout << "\t\t\t  5. Id\n";
+        cout << "\t\t\t  0. Go Back\n";
+        cout << "\t\t\t\nEnter choice: ";
+        cin >> choice;
+        flushInput();
+		
+        switch (choice) {
+            case 1: displaySortedByUploadDate(); return;
+            case 2: displaySortedByViews(); return;
+            case 3: displaySortedByLikes(); return;
+            case 4: displaySortedByComments(); return;
+            case 5: displaySortedById(); return;
+            case 0: return;
+            default: cout << "\t\t\tInvalid choice.\n";
+        }
+        
+    } while (choice != 0);	
+}
+
+void displayFindMenu(){ // when "find" is selected in the menu
+	int choice;
+    do {
+    	cout<<"\t\t--- Search By Options ---\n";
+        cout << "\t\t1. Search By Title\n";
+        cout << "\t\t2. Search By Video ID\n";
+        cout << "\t\t0. Go Back\n";
+        cout << "\t\t\nEnter choice: ";
+        cin >> choice;
+        flushInput();
+		
+        switch (choice) {
+            case 1: searchVideosByTitle(); return;
+            case 2: displayVideo(); return;
+            case 0: return;
+            default: cout << "\t\tInvalid choice.\n";
+        }
+        
+    } while (choice != 0);
+}
+
+void displayUpdateMenu() {
+    int choice;
+    do {
+        system("cls");
+        cout << "\t --- Update Video Attributes ---\n";
+        cout << "\t 1. Update Title\n";
+        cout << "\t 2. Update Channel Name\n"; 
+        cout << "\t 0. Go Back\n";
+        cout << "\t\nEnter choice: ";
+        cin >> choice;
+        flushInput();
+
+        switch (choice) {
+            case 1: updateVideoTitle(); return;
+            case 2: updateChannelName(); return; 
+            case 0: return;
+            default: cout << "\tInvalid choice.\n";
+        }
+    } while (choice != 0);
+}
+
 bool sortByUploadDate(const VideoNode &a, const VideoNode &b) {
 	return ascending ? (a.uploadDate < b.uploadDate) : (a.uploadDate > b.uploadDate); // When this function returns true, "a" comes before "b" in the sorted list
 } 
@@ -134,14 +267,14 @@ bool sortById(const VideoNode &a, const VideoNode &b) {
 	return ascending ? (a.videoId  < b.videoId) : (a.videoId > b.videoId);
 } 
 
-int findChannelIndexById(int id) {
+int findChannelIndexById(int id) { // find channel's index from 'channels' vector
     for (size_t i = 0; i < channels.size(); ++i) {
         if (channels[i].channelId == id) return static_cast<int>(i); // convert i with a data type of size_t to int
     }
     return -1; // id not found
 }
 
-int findVideoIndexById(int id) {
+int findVideoIndexById(int id) { // find video's index from allVideos vector
 	ascending = true;
 	sort(allVideos.begin(), allVideos.end(), sortById); // Sorts allVideos using sortById to compare items.
 	
@@ -159,6 +292,26 @@ int findVideoIndexById(int id) {
 			left = middle + 1;
 	}
 	return -1; // id not found
+}
+
+int findChannelIndexByName(const string& name) {
+    
+    for (size_t i = 0; i < channels.size(); ++i) { // Iterate through the 'channels' vector
+       
+        if (channels[i].channelName == name) {
+            return static_cast<int>(i); // Found, return the index
+        }
+    }
+    return -1; // Channel not found
+}
+
+int findVideoIndexInChannelById(const ChannelNode& channel, int videoId) { // find video's index from channel's video array
+    for (size_t i = 0; i < channel.videos.size(); ++i) {
+        if (channel.videos[i].videoId == videoId) {
+            return static_cast<int>(i);
+        }
+    }
+    return -1; // Video not found in this channel
 }
 
 void searchVideosByTitle() {
@@ -204,104 +357,6 @@ void displayVideo(){ // displays standalone video. needs an id
     VideoNode v = allVideos[index];
     displayRowHeader();
     displayRowValues(v);
-}
-
-void displayMenu() {
-	int choice;
-    do {
-        cout << "\tDisplay: \n";
-        cout << "\t1. Display All\n";
-        cout << "\t2. Sort\n";
-        cout << "\t3. Find\n";
-        cout << "\t0. Exit\n";
-        cout << "\tEnter choice: ";
-        cin >> choice;
-        flushInput();
-		
-        switch (choice) {
-            case 1: displayAll(); return;
-            case 2: displaySortOptionMenu(); return;
-            case 3: displayFindMenu(); return;
-            case 0: return;
-            default: cout << "\tInvalid choice.\n";
-        }
-        
-    } while (choice != 0);
-}
-
-void displaySortOptionMenu(){ // when sort option is selected.
-	int choice;
-    do {
-
-        cout << "\t\t1. Ascending\n";
-        cout << "\t\t2. Descending\n";
-        cout << "\t\t0. Exit\n";
-        cout << "\t\tEnter choice: ";
-        cin >> choice;
-        flushInput();
-		
-        switch (choice) {
-            case 1: 
-				ascending = true;
-				displaySortMenu(); 
-				return;
-			case 2:
-				ascending = false;
-				displaySortMenu();
-				return;
-            case 0:
-				 return;
-            default: cout << "\t\tInvalid choice.\n";
-        }
-        
-    } while (choice != 0);
-}
-
-void displaySortMenu(){ // when either ascending or descending is selected.
-int choice;
-    do {
-
-        cout << "\t\t\t1.By Upload date\n";
-        cout << "\t\t\t2.By Views\n";
-        cout << "\t\t\t3.By Likes\n";
-        cout << "\t\t\t4.By Comments\n";
-        cout << "\t\t\t5.By Id\n";
-        cout << "\t\t\t0. Exit\n";
-        cout << "\t\t\tEnter choice: ";
-        cin >> choice;
-        flushInput();
-		
-        switch (choice) {
-            case 1: displaySortedByUploadDate(); return;
-            case 2: displaySortedByViews(); return;
-            case 3: displaySortedByLikes(); return;
-            case 4: displaySortedByComments(); return;
-            case 5: displaySortedById(); return;
-            case 0: return;
-            default: cout << "\t\t\tInvalid choice.\n";
-        }
-        
-    } while (choice != 0);	
-}
-
-void displayFindMenu(){ // when "find" is selected in the menu
-	int choice;
-    do {
-        cout << "\t\t1. Find By Title\n";
-        cout << "\t\t2. Find By ID\n";
-        cout << "\t\t0. Exit\n";
-        cout << "\t\tEnter choice: ";
-        cin >> choice;
-        flushInput();
-		
-        switch (choice) {
-            case 1: searchVideosByTitle(); return;
-            case 2: displayVideo(); return;
-            case 0: return;
-            default: cout << "\t\tInvalid choice.\n";
-        }
-        
-    } while (choice != 0);
 }
 
 void displaySortedByUploadDate(){
@@ -411,7 +466,7 @@ void displayRowValues(const VideoNode &v){
 
 void displayAll() {
 	
-    for (size_t i = 0; i < channels.size(); ++i) {
+    for (size_t i = 0; i < channels.size(); ++i) { // Loops every channel
         const ChannelNode &ch = channels[i];  
         cout <<"\n" <<string(100, '=') << "\n";
         cout << "Channel ID   : " << ch.channelId << endl;
@@ -429,7 +484,7 @@ void displayAll() {
         displayRowHeader(); //row header
         
 		
-        for (size_t j = 0; j < ch.videos.size(); ++j) {
+        for (size_t j = 0; j < ch.videos.size(); ++j) { // Loops every channel
             const VideoNode &v = ch.videos[j];
             
             displayRowValues(v); // row values
@@ -519,7 +574,7 @@ void addPredefinedChannels() {
 
     addVideosHelper(ch1, {101, "Intro to C++", "2025-06-01", 1000, 250, 40, ch1.channelName}); // Argument 1 is the ChannelNode
     addVideosHelper(ch1, {102, "OOP Concepts Explained", "2025-06-03", 800, 210, 30, ch1.channelName}); // Argument 2 is the VideoNode and also the cause of the extended initializer warning.
-    addVideosHelper(ch1, {103, "Data Structures Fundamentals", "2025-06-05", 1200, 300, 45, ch1.channelName}); // still uses it because it is cleaner
+    addVideosHelper(ch1, {103, "Data Structures Fundamentals", "2025-06-05", 1200, 300, 45, ch1.channelName}); 
     addVideosHelper(ch1, {104, "Algorithms for Beginners", "2025-06-07", 950, 230, 35, ch1.channelName});
     addVideosHelper(ch1, {105, "Web Dev Basics with HTML/CSS", "2025-06-09", 1100, 280, 42, ch1.channelName});
     addVideosHelper(ch1, {106, "Introduction to Python", "2025-06-11", 1300, 320, 50, ch1.channelName});
@@ -566,6 +621,116 @@ void addPredefinedChannels() {
     channels.push_back(ch3);
 }
 
+void updateVideoTitle() {
+    cout << "\n--- Update Video Title ---\n";
+    int id;
+    cout << "Enter Video ID to update title: ";
+    cin >> id;
+    flushInput();
 
+    int allVideosIndex = findVideoIndexById(id); // get the videos' index from global allVideos vector.
 
+    if (allVideosIndex == -1) {
+        cout << "Video not found!\n";
+        return;
+    }
+
+    // Get a reference to the video in the global allVideos vector
+    VideoNode& videoToUpdateGlobal = allVideos[allVideosIndex];
+
+    // Find the corresponding video in its channel's video list
+    int channelIdx = findChannelIndexByName(videoToUpdateGlobal.channelName);
+    int videoInChannelIdx = -1;
+    if (channelIdx != -1) {
+        videoInChannelIdx = findVideoIndexInChannelById(channels[channelIdx], id);
+    }
+
+    if (channelIdx == -1 || videoInChannelIdx == -1) {
+        cout << "Error: Video found in global list but not in its channel. Data inconsistency.\n";
+        return; // Should ideally not happen with consistent data :)
+    }
+    
+    // Get a reference to the video in its channel's video vector
+    VideoNode& videoToUpdateInChannel = channels[channelIdx].videos[videoInChannelIdx];
+
+    cout << "Current Title: " << videoToUpdateGlobal.title << endl;
+    cout << "Enter New Title: "; // No option to leave blank if you want a change
+    string newTitle;
+    getline(cin, newTitle);
+
+    if (newTitle.empty()) {
+        cout << "Title cannot be empty. No update performed.\n";
+        return;
+    }
+
+    videoToUpdateGlobal.title = newTitle; // updates the video from allVideos
+    videoToUpdateInChannel.title = newTitle; // updates the video from the channel
+
+    cout << "Video title updated successfully!\n";
+}
+
+void updateChannelName() {
+	 // Display available channels
+    cout << "\nAvailable Channels:\n";
+    cout << string(50, '-') << "\n";
+    for (size_t i = 0; i < channels.size(); ++i) {
+        cout << "ID: " << channels[i].channelId 
+             << " | Name: " << channels[i].channelName 
+             << " | Owner: " << channels[i].ownerName << "\n";
+    }
+    cout << string(50, '-') << "\n";
+    
+    
+    cout << "\n--- Update Channel Name ---\n";
+    int channelIdToUpdate;
+    cout << "Enter Channel ID to update: ";
+    cin >> channelIdToUpdate;
+    flushInput();
+
+    int channelIndex = findChannelIndexById(channelIdToUpdate);
+
+    if (channelIndex == -1) {
+        cout << "Channel not found!\n";
+        return;
+    }
+
+    // Get a reference to the channel being updated
+    ChannelNode& channelToUpdate = channels[channelIndex];
+    string oldChannelName = channelToUpdate.channelName;
+
+    cout << "Current Channel Name: " << oldChannelName << endl;
+    cout << "Enter New Channel Name: ";
+    string newChannelName;
+    getline(cin, newChannelName);
+
+    if (newChannelName.empty()) {
+        cout << "New channel name cannot be empty. No update performed.\n";
+        return;
+    }
+
+    // Check if the new name already exists for another channel
+    for (size_t i = 0; i < channels.size(); ++i) {
+        if (i != channelIndex && channels[i].channelName == newChannelName) {
+            cout << "Error: Channel name '" << newChannelName << "' already exists for another channel (ID: " << channels[i].channelId << ").\n";
+            return;
+        }
+    }
+
+    // Update the channel name in the ChannelNode itself
+    channelToUpdate.channelName = newChannelName;
+
+    // Update the channel name for all videos associated with this channel in the 'allVideos' list
+    for (size_t i = 0; i < allVideos.size(); ++i) {
+        if (allVideos[i].channelName == oldChannelName) {
+            allVideos[i].channelName = newChannelName;
+        }
+    }
+
+    // Update the channel name for all videos directly stored within this channel's 'videos' vector
+    for (size_t i = 0; i < channelToUpdate.videos.size(); ++i) {
+        channelToUpdate.videos[i].channelName = newChannelName;
+    }
+
+    cout << "Channel name updated successfully from '" << oldChannelName << "' to '" << newChannelName << "'!\n";
+}
 
