@@ -49,6 +49,10 @@ void searchVideosByTitle();
 // update
 void updateVideoTitle();
 void updateChannelName();
+
+//delete
+void deleteVideo();
+void deleteChannel();
  
 // display datas in table format
 void displayAll(); 
@@ -60,13 +64,13 @@ void displaySortedByComments();
 void displaySortedById();
 void displayVideo();
 
-
 // menus
 void displayMenu();
 void displaySortOptionMenu();
 void displaySortMenu();
 void displayFindMenu();
 void displayUpdateMenu();
+void displayDeleteMenu();
 
 // helper functions
 void displayRowHeader();
@@ -136,7 +140,7 @@ void displayMenu() {
         cout << "\t 3. Sort Content\n";
         cout << "\t 4. Find Content\n";
         cout << "\t 5. Update Content\n";
-        cout << "\t 3. Delete Video\n";
+        cout << "\t 6. Delete Content\n";
         cout << "\t 0. Go Back\n";
         cout << "\t\nEnter choice: ";
         cin >> choice;
@@ -148,6 +152,7 @@ void displayMenu() {
             case 3: displaySortOptionMenu(); return;
             case 4: displayFindMenu(); return;
             case 5: displayUpdateMenu(); return;
+            case 6: displayDeleteMenu(); return;
             case 0: return;
             default: cout << "\tInvalid choice.\n";
         }
@@ -234,7 +239,6 @@ void displayFindMenu(){ // when "find" is selected in the menu
 void displayUpdateMenu() {
     int choice;
     do {
-        system("cls");
         cout << "\t --- Update Video Attributes ---\n";
         cout << "\t 1. Update Title\n";
         cout << "\t 2. Update Channel Name\n"; 
@@ -246,6 +250,26 @@ void displayUpdateMenu() {
         switch (choice) {
             case 1: updateVideoTitle(); return;
             case 2: updateChannelName(); return; 
+            case 0: return;
+            default: cout << "\tInvalid choice.\n";
+        }
+    } while (choice != 0);
+}
+
+void displayDeleteMenu() {
+	int choice;
+    do {
+        cout << "\t --- Update Video Attributes ---\n";
+        cout << "\t 1. Delete Video\n";
+        cout << "\t 2. Delete Channel\n"; 
+        cout << "\t 0. Go Back\n";
+        cout << "\t\nEnter choice: ";
+        cin >> choice;
+        flushInput();
+
+        switch (choice) {
+            case 1: deleteVideo(); return;
+            case 2: deleteChannel(); return; 
             case 0: return;
             default: cout << "\tInvalid choice.\n";
         }
@@ -779,5 +803,71 @@ void updateChannelName() {
     }
 
     cout << "Channel name updated successfully from '" << oldChannelName << "' to '" << newChannelName << "'!\n";
+}
+
+void deleteVideo() {
+    cout << "\n--- Delete Video ---\n";
+    int idToDelete;
+    cout << "Enter Video ID to delete: ";
+    cin >> idToDelete;
+    flushInput();
+
+    // Find the video in the global 'allVideos' list
+    int allVideosIndex = findVideoIndexById(idToDelete);
+
+    if (allVideosIndex == -1) {
+        cout << "Video not found!\n";
+        return;
+    }
+
+    // Get the channel name before removing from allVideos
+    string channelNameOfVideo = allVideos[allVideosIndex].channelName;
+
+    // Remove the video from the 'allVideos' global list
+    allVideos.erase(allVideos.begin() + allVideosIndex);
+
+    // Find the parent channel
+    int channelIndex = findChannelIndexByName(channelNameOfVideo);
+
+    // Find the video within its parent channel's video list
+    ChannelNode& parentChannel = channels[channelIndex]; // Get reference to modify
+    int videoInChannelIndex = findVideoIndexInChannelById(parentChannel, idToDelete);
+
+    // Remove the video from the channel's video list
+    parentChannel.videos.erase(parentChannel.videos.begin() + videoInChannelIndex);
+
+    cout << "Video with ID " << idToDelete << " deleted successfully." <<endl;
+}
+
+void deleteChannel() {
+	displayAvailableChannels();
+	
+    cout << "\n--- Delete Channel ---\n";
+    int idToDelete;
+    cout << "Enter Channel ID to delete: ";
+    cin >> idToDelete;
+    flushInput();
+
+    int channelIndex = findChannelIndexById(idToDelete);
+
+    if (channelIndex == -1) {
+        cout << "Channel not found!\n";
+        return;
+    }
+
+    // Get the name of the channel being deleted (needed for video cleanup)
+    string channelNameOfDeletedChannel = channels[channelIndex].channelName;
+
+    // Remove the channel from the 'channels' global list
+    channels.erase(channels.begin() + channelIndex);
+
+    // 2. Remove all videos associated with this channel from the 'allVideos' global list
+    for (int i = static_cast<int>(allVideos.size()) - 1; i >= 0; --i) {
+        if (allVideos[i].channelName == channelNameOfDeletedChannel) {
+            allVideos.erase(allVideos.begin() + i);
+        }
+    }
+
+    cout << "Channel ID " << idToDelete << " (named '" << channelNameOfDeletedChannel << "') and all its videos deleted successfully!\n";
 }
 
