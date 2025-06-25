@@ -27,7 +27,7 @@ struct ChannelNode {
 }; 
 
 vector<ChannelNode> channels; // Holds all channel entries in memory.
-vector<VideoNode> allVideos; // Holds all the videos from every channel.
+vector<VideoNode> allVideos; // Holds all the videos from every channel. Every time I added a video in a channel, I append the video here too. Important for sorting.
 int CHANNEL_ID = 500; // starting value of the ids. I will increment them every channel or video created.
 int VIDEO_ID = 500;
 bool ascending = true; //global flag. Will be used when user is prompted Descending or Ascending in Menus. and we will base the sorting according to this value.
@@ -39,7 +39,7 @@ void addChannel();
 void addVideoToChannel(); 
 void addPredefinedChannels();
 
-// search
+// search helper
 int findChannelIndexById(int id); // maps every element in 'channels'
 int findVideoIndexById(int id); // used binary search. find video's index in allVideos vector.
 int findChannelIndexByName(const string& name);    // Finds a channel's index in 'channels' vector by its name, or returns -1 if not found.
@@ -127,9 +127,10 @@ void flushInput() {
 string toLower(string str) {
     for (size_t i = 0; i < str.length(); ++i)
         str[i] = tolower(str[i]);
-    return str; // returns all lowercased letter of a word
-}
+    return str; // returns all lowercased letter of a word (str)
+} 
 
+// menus
 void displayMenu() {
 	int choice;
     do {
@@ -160,7 +161,7 @@ void displayMenu() {
     } while (choice != 0);
 }
 
-void displaySortOptionMenu(){ // when sort option is selected.
+void displaySortOptionMenu(){ // when 'sort content' option is selected.
 	int choice;
     do {
 		cout<<"\t\t --- Select Sort Direction ---\n";	
@@ -188,7 +189,7 @@ void displaySortOptionMenu(){ // when sort option is selected.
     } while (choice != 0);
 }
 
-void displaySortMenu(){ // when either ascending or descending is selected.
+void displaySortMenu(){ // when either 'ascending' or 'descending' is selected.
 int choice;
     do {
 		cout<<"\t\t\t--- Select Sort Criterion ---\n";
@@ -215,7 +216,7 @@ int choice;
     } while (choice != 0);	
 }
 
-void displayFindMenu(){ // when "find" is selected in the menu
+void displayFindMenu(){ // when "find content" is selected in the menu
 	int choice;
     do {
     	cout<<"\t\t--- Search By Options ---\n";
@@ -236,7 +237,7 @@ void displayFindMenu(){ // when "find" is selected in the menu
     } while (choice != 0);
 }
 
-void displayUpdateMenu() {
+void displayUpdateMenu() { // when 'update content' is selected in the menu
     int choice;
     do {
         cout << "\t --- Update Video Attributes ---\n";
@@ -256,7 +257,7 @@ void displayUpdateMenu() {
     } while (choice != 0);
 }
 
-void displayDeleteMenu() {
+void displayDeleteMenu() { // when 'delete content' is selected in the menu
 	int choice;
     do {
         cout << "\t --- Update Video Attributes ---\n";
@@ -276,9 +277,10 @@ void displayDeleteMenu() {
     } while (choice != 0);
 }
 
+// sort logic for std::sort by algorithm library
 bool sortByUploadDate(const VideoNode &a, const VideoNode &b) {
 	return ascending ? (a.uploadDate < b.uploadDate) : (a.uploadDate > b.uploadDate); // When this function returns true, "a" comes before "b" in the sorted list
-} 
+} //
 
 bool sortByViews(const VideoNode &a, const VideoNode &b) {
 	return ascending ? (a.views < b.views) : (a.views > b.views);
@@ -296,6 +298,7 @@ bool sortById(const VideoNode &a, const VideoNode &b) {
 	return ascending ? (a.videoId  < b.videoId) : (a.videoId > b.videoId);
 } 
 
+// search helper
 int findChannelIndexById(int id) { // find channel's index from 'channels' vector
     for (size_t i = 0; i < channels.size(); ++i) {
         if (channels[i].channelId == id) return static_cast<int>(i); // convert i with a data type of size_t to int
@@ -369,6 +372,7 @@ void searchVideosByTitle() {
     }
 }
 
+// display datas in table format
 void displayVideo(){ // displays standalone video. needs an id
 	
 	int id;
@@ -468,6 +472,80 @@ void displaySortedById(){
 	}	
 }
 
+void displayAll() {
+	
+	if (channels.empty()){
+		cout<<"There are no channels."<<endl;
+		return;
+	}
+	
+    for (size_t i = 0; i < channels.size(); ++i) { // Loops every channel
+        const ChannelNode &ch = channels[i];  
+        cout <<"\n" <<string(100, '=') << "\n";
+        cout << "Channel ID   : " << ch.channelId << endl;
+        cout << "Channel Name : \033[31m" << ch.channelName <<"\033[0m"<< endl;  // "\033[31m" color text to red. "\033[0m" reset the color
+        cout << "Owner Name   : " << ch.ownerName << endl;
+
+        if (ch.videos.empty()) {
+            cout << "No videos uploaded.\n";
+            continue;
+        }
+
+	
+        cout << "\nVideos:\n";
+        
+        displayRowHeader(); //row header
+        
+		
+        for (size_t j = 0; j < ch.videos.size(); ++j) { // Loops every channel
+            const VideoNode &v = ch.videos[j];
+            
+            displayRowValues(v); // row values
+        }
+    }
+    cout <<"\n" <<string(100, '=') << "\n";
+}
+
+void displayChannelAndVideos() {
+	
+	displayAvailableChannels();
+	
+    cout << "\n--- Display Channel and Videos ---\n";
+    int channelId;
+    cout << "Enter Channel ID to display: ";
+    cin >> channelId;
+    flushInput();
+
+    int channelIndex = findChannelIndexById(channelId);
+
+    if (channelIndex == -1) {
+        cout << "Channel not found!\n";
+        return;
+    }
+
+    const ChannelNode& ch = channels[channelIndex]; // reference the found channel
+
+    // Display Channel Details
+    cout << "\n" << string(100, '=') << "\n";
+    cout << "Channel ID     : " << ch.channelId << endl;
+    cout << "Channel Name   : \033[31m" << ch.channelName << "\033[0m" << endl;
+    cout << "Owner Name     : " << ch.ownerName << endl;
+
+    // Display Videos for the Channel
+    if (ch.videos.empty()) {
+        cout << "No videos uploaded to this channel.\n";
+    } else {
+        cout << "\nVideos:\n";
+        displayRowHeader(); // Display table header
+        for (size_t j = 0; j < ch.videos.size(); ++j) {
+            const VideoNode& v = ch.videos[j];
+            displayRowValues(v); // Display each video's row values
+        }
+    }
+    cout << "\n" << string(100, '=') << "\n";
+}
+
+// update content
 void updateVideoTitle() {
     cout << "\n--- Update Video Title ---\n";
     int id;
@@ -578,6 +656,7 @@ void updateChannelName() {
     cout << "Channel name updated successfully from '" << oldChannelName << "' to '" << newChannelName << "'!\n";
 }
 
+// delete content
 void deleteVideo() {
     cout << "\n--- Delete Video ---\n";
     int idToDelete;
@@ -650,6 +729,7 @@ void deleteChannel() {
     cout << "Channel ID " << idToDelete << " (named '" << channelNameOfDeletedChannel << "') and all its videos deleted successfully!\n";
 }
 
+// helper function
 void displayRowHeader(){
         cout << left       // align the strings to the left
         	 << setw(2) << "-"     // setw(num characters wide column) 
@@ -693,79 +773,7 @@ void displayAvailableChannels(){
     cout << string(50, '-') << "\n";
 }
 
-void displayAll() {
-	
-	if (channels.empty()){
-		cout<<"There are no channels."<<endl;
-		return;
-	}
-	
-    for (size_t i = 0; i < channels.size(); ++i) { // Loops every channel
-        const ChannelNode &ch = channels[i];  
-        cout <<"\n" <<string(100, '=') << "\n";
-        cout << "Channel ID   : " << ch.channelId << endl;
-        cout << "Channel Name : \033[31m" << ch.channelName <<"\033[0m"<< endl;  // "\033[31m" color text to red. "\033[0m" reset the color
-        cout << "Owner Name   : " << ch.ownerName << endl;
-
-        if (ch.videos.empty()) {
-            cout << "No videos uploaded.\n";
-            continue;
-        }
-
-	
-        cout << "\nVideos:\n";
-        
-        displayRowHeader(); //row header
-        
-		
-        for (size_t j = 0; j < ch.videos.size(); ++j) { // Loops every channel
-            const VideoNode &v = ch.videos[j];
-            
-            displayRowValues(v); // row values
-        }
-    }
-    cout <<"\n" <<string(100, '=') << "\n";
-}
-
-void displayChannelAndVideos() {
-	
-	displayAvailableChannels();
-	
-    cout << "\n--- Display Channel and Videos ---\n";
-    int channelId;
-    cout << "Enter Channel ID to display: ";
-    cin >> channelId;
-    flushInput();
-
-    int channelIndex = findChannelIndexById(channelId);
-
-    if (channelIndex == -1) {
-        cout << "Channel not found!\n";
-        return;
-    }
-
-    const ChannelNode& ch = channels[channelIndex]; // reference the found channel
-
-    // Display Channel Details
-    cout << "\n" << string(100, '=') << "\n";
-    cout << "Channel ID     : " << ch.channelId << endl;
-    cout << "Channel Name   : \033[31m" << ch.channelName << "\033[0m" << endl;
-    cout << "Owner Name     : " << ch.ownerName << endl;
-
-    // Display Videos for the Channel
-    if (ch.videos.empty()) {
-        cout << "No videos uploaded to this channel.\n";
-    } else {
-        cout << "\nVideos:\n";
-        displayRowHeader(); // Display table header
-        for (size_t j = 0; j < ch.videos.size(); ++j) {
-            const VideoNode& v = ch.videos[j];
-            displayRowValues(v); // Display each video's row values
-        }
-    }
-    cout << "\n" << string(100, '=') << "\n";
-}
-
+// add content
 void addVideoToChannel() {
 	
 	if (channels.empty()) {
@@ -838,6 +846,7 @@ void addVideosHelper(ChannelNode& c, VideoNode v){ // "&" means pass by referenc
     allVideos.push_back(v);
 }
 
+// add predefined channels
 void addPredefinedChannels() {
     // Channel 1
     ChannelNode ch1;
