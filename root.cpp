@@ -52,12 +52,14 @@ void updateChannelName();
  
 // display datas in table format
 void displayAll(); 
+void displayChannelAndVideos();
 void displaySortedByUploadDate();
 void displaySortedByViews();
 void displaySortedByLikes();
 void displaySortedByComments();
 void displaySortedById();
 void displayVideo();
+
 
 // menus
 void displayMenu();
@@ -69,6 +71,7 @@ void displayUpdateMenu();
 // helper functions
 void displayRowHeader();
 void displayRowValues(const VideoNode &v);
+void displayAvailableChannels();
 void addVideosHelper(ChannelNode& c, VideoNode v);
 
 // sort logic for std::sort by algorithm library
@@ -129,9 +132,10 @@ void displayMenu() {
     	cout<<"\t --- Content Management ---\n";
         cout << "\t Display: \n";
         cout << "\t 1. Show All Content\n";
-        cout << "\t 2. Sort Content\n";
-        cout << "\t 3. Find Content\n";
-        cout << "\t 4. Update Content\n";
+        cout << "\t 2. Display Channel Videos\n";
+        cout << "\t 3. Sort Content\n";
+        cout << "\t 4. Find Content\n";
+        cout << "\t 5. Update Content\n";
         cout << "\t 3. Delete Video\n";
         cout << "\t 0. Go Back\n";
         cout << "\t\nEnter choice: ";
@@ -140,9 +144,10 @@ void displayMenu() {
 		
         switch (choice) {
             case 1: displayAll(); return;
-            case 2: displaySortOptionMenu(); return;
-            case 3: displayFindMenu(); return;
-            case 4: displayUpdateMenu(); return;
+            case 2: displayChannelAndVideos(); return;
+            case 3: displaySortOptionMenu(); return;
+            case 4: displayFindMenu(); return;
+            case 5: displayUpdateMenu(); return;
             case 0: return;
             default: cout << "\tInvalid choice.\n";
         }
@@ -464,6 +469,18 @@ void displayRowValues(const VideoNode &v){
                  << setw(10) << v.channelName  << endl;
 }
 
+void displayAvailableChannels(){
+	// Display available channels
+    cout << "\nAvailable Channels:\n";
+    cout << string(50, '-') << "\n";
+    for (size_t i = 0; i < channels.size(); ++i) {
+        cout << "ID: " << channels[i].channelId 
+             << " | Name: " << channels[i].channelName 
+             << " | Owner: " << channels[i].ownerName << "\n";
+    }
+    cout << string(50, '-') << "\n";
+}
+
 void displayAll() {
 	
     for (size_t i = 0; i < channels.size(); ++i) { // Loops every channel
@@ -491,6 +508,45 @@ void displayAll() {
         }
     }
     cout <<"\n" <<string(100, '=') << "\n";
+}
+
+void displayChannelAndVideos() {
+	
+	displayAvailableChannels();
+	
+    cout << "\n--- Display Channel and Videos ---\n";
+    int channelId;
+    cout << "Enter Channel ID to display: ";
+    cin >> channelId;
+    flushInput();
+
+    int channelIndex = findChannelIndexById(channelId);
+
+    if (channelIndex == -1) {
+        cout << "Channel not found!\n";
+        return;
+    }
+
+    const ChannelNode& ch = channels[channelIndex]; // reference the found channel
+
+    // Display Channel Details
+    cout << "\n" << string(100, '=') << "\n";
+    cout << "Channel ID     : " << ch.channelId << endl;
+    cout << "Channel Name   : \033[31m" << ch.channelName << "\033[0m" << endl;
+    cout << "Owner Name     : " << ch.ownerName << endl;
+
+    // Display Videos for the Channel
+    if (ch.videos.empty()) {
+        cout << "No videos uploaded to this channel.\n";
+    } else {
+        cout << "\nVideos:\n";
+        displayRowHeader(); // Display table header
+        for (size_t j = 0; j < ch.videos.size(); ++j) {
+            const VideoNode& v = ch.videos[j];
+            displayRowValues(v); // Display each video's row values
+        }
+    }
+    cout << "\n" << string(100, '=') << "\n";
 }
 
 void addVideoToChannel() {
@@ -670,16 +726,7 @@ void updateVideoTitle() {
 }
 
 void updateChannelName() {
-	 // Display available channels
-    cout << "\nAvailable Channels:\n";
-    cout << string(50, '-') << "\n";
-    for (size_t i = 0; i < channels.size(); ++i) {
-        cout << "ID: " << channels[i].channelId 
-             << " | Name: " << channels[i].channelName 
-             << " | Owner: " << channels[i].ownerName << "\n";
-    }
-    cout << string(50, '-') << "\n";
-    
+	displayAvailableChannels();
     
     cout << "\n--- Update Channel Name ---\n";
     int channelIdToUpdate;
